@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pemulihan Akun WA - Support Center</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        waDark: '#0a1014',
+                        waCard: '#111b21',
+                        waInput: '#182229',
+                        waBorder: '#222d34',
+                        waGreen: '#00a884',
+                        waGreenGlow: '#02d2a2',
+                        waAccent: '#25d366',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #0a1014;
+            color: #e9edef;
+            font-family: 'Inter', sans-serif;
+            background-image: radial-gradient(circle at 50% 0%, #00a8841a 0%, transparent 50%);
+        }
+        .glow-border {
+            box-shadow: 0 0 15px rgba(0, 168, 132, 0.2);
+        }
+        .progress-ring-circle {
+            transition: stroke-dashoffset 0.35s;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-4">
+
+    <div class="w-full max-w-md mx-auto relative">
+        
+        <!-- Header Badge & Status Server -->
+        <div class="flex flex-col items-center gap-2 mb-6">
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-waGreen/10 border border-waGreen/30 text-waGreen text-xs font-medium tracking-wider uppercase">
+                <i class="fa-solid fa-shield-halved text-sm"></i>
+                <span>Support Center Unban</span>
+            </div>
+            
+            <!-- Dynamic Server Status Indicator -->
+            <div id="serverStatusBadge" class="flex items-center gap-2 px-3 py-1 rounded-lg bg-waCard border border-waBorder text-[11px] text-gray-300">
+                <span class="relative flex h-2 w-2">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
+                <span>Server WA Status: <strong class="text-emerald-400">ONLINE</strong></span>
+                <span class="text-gray-500">•</span>
+                <span class="text-xs font-mono text-gray-400" id="serverPing">28 ms</span>
+            </div>
+        </div>
+
+        <!-- TAB NAVIGATION -->
+        <div class="grid grid-cols-2 gap-2 mb-4 bg-waCard p-1 rounded-2xl border border-waBorder">
+            <button id="tabFormBtn" onclick="switchTab('form')" class="py-2.5 rounded-xl text-xs font-semibold text-waGreen bg-waInput transition">
+                <i class="fa-solid fa-paper-plane mr-1.5"></i>Ajukan Unban
+            </button>
+            <button id="tabCheckBtn" onclick="switchTab('check')" class="py-2.5 rounded-xl text-xs font-semibold text-gray-400 hover:text-white transition">
+                <i class="fa-solid fa-magnifying-glass mr-1.5"></i>Cek Status Nomor
+            </button>
+        </div>
+
+        <!-- MAIN CARD -->
+        <div id="mainCard" class="bg-waCard rounded-3xl p-6 border border-waBorder shadow-2xl relative overflow-hidden glow-border">
+            
+            <!-- FORM STATE (AJUKAN UNBAN) -->
+            <div id="formState" class="space-y-6">
+                <!-- Icon & Title -->
+                <div class="text-center space-y-2">
+                    <div class="w-16 h-16 mx-auto rounded-full bg-waGreen/10 flex items-center justify-center border border-waGreen/30 mb-3">
+                        <i class="fa-brands fa-whatsapp text-3xl text-waGreen"></i>
+                    </div>
+                    <h1 class="text-2xl font-bold text-white tracking-tight">Pemulihan Akun WA</h1>
+                    <p class="text-xs text-gray-400 leading-relaxed max-w-xs mx-auto">
+                        Layanan verifikasi dan peninjauan ulang status pemblokiran nomor WhatsApp otomatis.
+                    </p>
+                </div>
+
+                <!-- FORM INPUTS -->
+                <form id="unbanForm" onsubmit="handleFormSubmit(event)" class="space-y-4">
+                    
+                    <!-- Input Nomor WA -->
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-semibold uppercase tracking-wider text-gray-300 flex items-center justify-between">
+                            <span>Nomor WhatsApp</span>
+                            <i class="fa-solid fa-circle-info text-gray-500 text-xs" title="Masukkan nomor dengan awalan 08 atau +62"></i>
+                        </label>
+                        <div class="relative flex items-center">
+                            <i class="fa-solid fa-phone absolute left-4 text-waGreen text-sm"></i>
+                            <input 
+                                type="tel" 
+                                id="phoneInput" 
+                                required
+                                placeholder="0856-4220-8769" 
+                                class="w-full bg-waInput border border-waBorder rounded-2xl py-3.5 pl-11 pr-4 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-waGreen transition"
+                            >
+                        </div>
+                    </div>
+
+                    <!-- Input Penyebab Blokir -->
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-semibold uppercase tracking-wider text-gray-300">
+                            Penyebab Pemblokiran
+                        </label>
+                        <div class="relative flex items-center">
+                            <i class="fa-solid fa-triangle-exclamation absolute left-4 text-amber-500 text-sm"></i>
+                            <select 
+                                id="reasonSelect" 
+                                required 
+                                class="w-full bg-waInput border border-waBorder rounded-2xl py-3.5 pl-11 pr-10 text-sm text-white appearance-none focus:outline-none focus:border-waGreen transition"
+                            >
+                                <option value="" disabled selected>Pilih Status / Jenis Blokir</option>
+                                <option value="spam">Terdeteksi Spam / Pesan Massal</option>
+                                <option value="unofficial">Menggunakan WA GB / Unofficial App</option>
+                                <option value="banned_temp">Pemblokiran Sementara (Timer)</option>
+                                <option value="banned_perm">Pemblokiran Permanen</option>
+                                <option value="unknown">Tidak Diketahui / Tiba-tiba Keblokir</option>
+                            </select>
+                            <i class="fa-solid fa-chevron-down absolute right-4 text-gray-400 text-xs pointer-events-none"></i>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button 
+                        type="submit" 
+                        class="w-full bg-waGreen hover:bg-waGreenGlow text-waDark font-bold py-4 rounded-2xl transition duration-200 flex items-center justify-center gap-2 shadow-lg shadow-waGreen/20 mt-2 active:scale-[0.98]"
+                    >
+                        <i class="fa-solid fa-paper-plane text-sm"></i>
+                        <span>Kirim Ajuan Pemulihan</span>
+                    </button>
+                </form>
+
+                <!-- Small Disclaimer -->
+                <p class="text-[10px] text-center text-gray-500 leading-tight">
+                    Sistem ini terhubung secara langsung ke server peninjauan nomor otomatis. Proses memerlukan waktu maksimum 1x24 jam.
+                </p>
+            </div>
+
+            <!-- CHECK STATUS STATE (TAB BARU) -->
+            <div id="checkStatusState" class="hidden space-y-5">
+                <div class="text-center space-y-1">
+                    <h2 class="text-lg font-bold text-white">Cek Status Pemulihan</h2>
+                    <p class="text-xs text-gray-400">Masukkan nomor HP untuk melihat apakah akun WA sudah berhasil dipulihkan.</p>
+                </div>
+
+                <div class="space-y-3">
+                    <div class="relative flex items-center">
+                        <i class="fa-solid fa-search absolute left-4 text-waGreen text-sm"></i>
+                        <input 
+                            type="tel" 
+                            id="checkPhoneInput" 
+                            placeholder="Masukkan nomor WA (cth: 0856-4220-8769)" 
+                            class="w-full bg-waInput border border-waBorder rounded-2xl py-3.5 pl-11 pr-4 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-waGreen transition"
+                        >
+                    </div>
+                    <button 
+                        onclick="checkNumberStatus()" 
+                        class="w-full bg-waGreen/20 hover:bg-waGreen/30 border border-waGreen/40 text-waGreen font-semibold py-3 rounded-2xl transition flex items-center justify-center gap-2"
+                    >
+                        <i class="fa-solid fa-arrows-rotate text-sm"></i>
+                        <span>Periksa Status Nomor</span>
+                    </button>
+                </div>
+
+                <!-- Result Box -->
+                <div id="checkResult" class="hidden rounded-2xl bg-waInput border border-waBorder p-4 space-y-3 text-xs">
+                    <div class="flex justify-between items-center border-b border-waBorder pb-2">
+                        <span class="text-gray-400">Nomor:</span>
+                        <span id="resPhone" class="font-bold text-white font-mono">085642208769</span>
+                    </div>
+                    <div class="flex justify-between items-center border-b border-waBorder pb-2">
+                        <span class="text-gray-400">Status Pemulihan:</span>
+                        <span id="resStatusBadge" class="px-2.5 py-1 rounded-md text-[11px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                            PULIH / AKTIF
+                        </span>
+                    </div>
+                    <div class="flex justify-between items-center border-b border-waBorder pb-2">
+                        <span class="text-gray-400">Tanggal Pengajuan:</span>
+                        <span id="resDate" class="text-gray-300">Hari ini</span>
+                    </div>
+                    <p id="resDescription" class="text-[11px] text-gray-400 leading-relaxed pt-1">
+                        Nomor telah dibebaskan dari blokir. Silakan coba masuk/login ke aplikasi WhatsApp Anda kembali.
+                    </p>
+                </div>
+            </div>
+
+            <!-- LOADING STATE (Hidden by default) -->
+            <div id="loadingState" class="hidden py-8 space-y-6 text-center">
+                <div class="relative w-32 h-32 mx-auto flex items-center justify-center">
+                    <!-- Progress Ring -->
+                    <svg class="w-full h-full">
+                        <circle class="text-waInput" stroke-width="8" stroke="currentColor" fill="transparent" r="52" cx="64" cy="64"/>
+                        <circle id="progressCircle" class="text-waGreen progress-ring-circle" stroke-width="8" stroke-dasharray="326.72" stroke-dashoffset="326.72" stroke-linecap="round" stroke="currentColor" fill="transparent" r="52" cx="64" cy="64"/>
+                    </svg>
+                    <!-- WhatsApp Icon Center -->
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <i class="fa-brands fa-whatsapp text-4xl text-waGreen animate-pulse"></i>
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <h2 id="loadingText" class="text-lg font-semibold text-white">Menghubungkan ke server WhatsApp...</h2>
+                    <div class="w-full bg-waInput h-2 rounded-full overflow-hidden border border-waBorder">
+                        <div id="progressBar" class="bg-waGreen h-full w-0 transition-all duration-300"></div>
+                    </div>
+                    <p id="loadingPercentage" class="text-xl font-bold text-waGreen pt-2">0%</p>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Footer Info -->
+        <div class="text-center mt-6 text-xs text-gray-500 space-y-1">
+            <p>&copy; 2026 WhatsApp Support Center System.</p>
+            <p class="text-[10px] text-gray-600">Aplikasi Simulasi & Verifikasi Layanan Bantuan WhatsApp</p>
+        </div>
+
+    </div>
+
+    <!-- SUCCESS MODAL (Hidden by default) -->
+    <div id="successModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden transition-opacity duration-300">
+        <div class="bg-waCard border border-waBorder rounded-3xl p-6 w-full max-w-sm text-center space-y-5 shadow-2xl glow-border transform scale-95 transition-transform duration-300" id="modalCard">
+            
+            <!-- Success Icon -->
+            <div class="w-16 h-16 bg-waGreen/20 rounded-full flex items-center justify-center mx-auto border border-waGreen/40">
+                <i class="fa-solid fa-check text-2xl text-waGreen"></i>
+            </div>
+
+            <!-- Content Text -->
+            <div class="space-y-2">
+                <h3 class="text-xl font-bold text-white">Permintaan Terkirim!</h3>
+                <p class="text-sm text-gray-300 leading-relaxed">
+                    Nomor <span id="submittedPhone" class="text-waGreen font-semibold"></span> telah masuk ke dalam antrean prioritas sistem unban. Mohon tunggu <span class="font-semibold text-white">1×24 jam</span>.
+                </p>
+            </div>
+
+            <!-- Detail Box -->
+            <div class="bg-waInput rounded-2xl p-3 text-left border border-waBorder text-xs space-y-1 text-gray-400">
+                <div class="flex justify-between">
+                    <span>ID Tiket:</span>
+                    <span id="ticketId" class="text-white font-mono">#WA-89421</span>
+                </div>
+                <div class="flex justify-between">
+                    <span>Status:</span>
+                    <span class="text-emerald-400 font-medium">Dalam Antrean Peninjauan</span>
+                </div>
+            </div>
+
+            <!-- Close Button -->
+            <button 
+                onclick="closeModal()" 
+                class="w-full bg-waInput hover:bg-waBorder border border-waBorder text-white font-semibold py-3.5 rounded-2xl transition active:scale-[0.98]"
+            >
+                Selesai & Tutup
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const formState = document.getElementById('formState');
+        const checkStatusState = document.getElementById('checkStatusState');
+        const loadingState = document.getElementById('loadingState');
+        const successModal = document.getElementById('successModal');
+        const modalCard = document.getElementById('modalCard');
+        const loadingText = document.getElementById('loadingText');
+        const progressBar = document.getElementById('progressBar');
+        const progressCircle = document.getElementById('progressCircle');
+        const loadingPercentage = document.getElementById('loadingPercentage');
+        const submittedPhone = document.getElementById('submittedPhone');
+        const ticketId = document.getElementById('ticketId');
+        const serverPing = document.getElementById('serverPing');
+
+        // Storage for submitted numbers (simulated DB)
+        let submittedNumbersList = [];
+
+        // Dynamic Ping Simulator
+        setInterval(() => {
+            const randomPing = Math.floor(Math.random() * 15) + 20; // 20ms - 35ms
+            if (serverPing) serverPing.innerText = randomPing + ' ms';
+        }, 3000);
+
+        // Switch Tab Function
+        function switchTab(tab) {
+            const formBtn = document.getElementById('tabFormBtn');
+            const checkBtn = document.getElementById('tabCheckBtn');
+
+            if (tab === 'form') {
+                formState.classList.remove('hidden');
+                checkStatusState.classList.add('hidden');
+                loadingState.classList.add('hidden');
+
+                formBtn.className = "py-2.5 rounded-xl text-xs font-semibold text-waGreen bg-waInput transition";
+                checkBtn.className = "py-2.5 rounded-xl text-xs font-semibold text-gray-400 hover:text-white transition";
+            } else {
+                formState.classList.add('hidden');
+                checkStatusState.classList.remove('hidden');
+                loadingState.classList.add('hidden');
+
+                checkBtn.className = "py-2.5 rounded-xl text-xs font-semibold text-waGreen bg-waInput transition";
+                formBtn.className = "py-2.5 rounded-xl text-xs font-semibold text-gray-400 hover:text-white transition";
+            }
+        }
+
+        // Check Number Status Logic
+        function checkNumberStatus() {
+            const phone = document.getElementById('checkPhoneInput').value.trim();
+            const resultBox = document.getElementById('checkResult');
+            const resPhone = document.getElementById('resPhone');
+            const resStatusBadge = document.getElementById('resStatusBadge');
+            const resDate = document.getElementById('resDate');
+            const resDescription = document.getElementById('resDescription');
+
+            if (!phone) return;
+
+            resultBox.classList.remove('hidden');
+            resPhone.innerText = phone;
+
+            // Check if phone was submitted in current session
+            const match = submittedNumbersList.find(item => item.phone === phone);
+
+            if (match) {
+                // Number was submitted recently
+                resStatusBadge.className = "px-2.5 py-1 rounded-md text-[11px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30";
+                resStatusBadge.innerText = "SEDANG DIPROSES";
+                resDate.innerText = match.time;
+                resDescription.innerText = "Nomor Anda sedang dalam antrean verifikasi server. Peninjauan memerlukan waktu maks 1x24 jam.";
+            } else if (phone.endsWith('88') || phone.endsWith('00')) {
+                // Simulated Fully Recovered Case
+                resStatusBadge.className = "px-2.5 py-1 rounded-md text-[11px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
+                resStatusBadge.innerText = "PULIH / AKTIF";
+                resDate.innerText = "Kemarin";
+                resDescription.innerText = "Selamat! Nomor WhatsApp Anda telah berhasil dipulihkan. Anda dapat mencoba login kembali ke aplikasi WA.";
+            } else {
+                // Random default simulation for demo
+                const isRecovered = Math.random() > 0.4;
+                if (isRecovered) {
+                    resStatusBadge.className = "px-2.5 py-1 rounded-md text-[11px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
+                    resStatusBadge.innerText = "PULIH / AKTIF";
+                    resDate.innerText = "Selesai ditinjau";
+                    resDescrip
